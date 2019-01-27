@@ -2,7 +2,7 @@ Topup your Lebara sim card with credits.
 ------------------
 * Only iDeal is supported (for now) as a paypent method.
 * LebaraOne is only supported(for now).
-* It opens firefox just before signing in bank's website to finish up the payment. It shifts the focus to firefox and closes it if transaction gets cancelled.
+* Opens the default browser just before signing in bank's website, to let user finish up the payment.
 ------------------
 Install in a virtual environment with pipenv:
 `pipenv install`
@@ -10,6 +10,11 @@ Install in a virtual environment with pipenv:
 Supply required info and run with:
 ```
 $ LEBARA_MOBILE=06.. LEBARA_EMAIL=.. LEBARA_BANK=.. ./topup.py
+```
+
+Use your own choice of browser:
+```
+$ LEBARA_MOBILE=06.. LEBARA_EMAIL=.. LEBARA_BANK=.. BROWSER=chromium ./topup.py
 ```
 
 Banks to choose from:
