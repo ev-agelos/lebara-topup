@@ -7,14 +7,9 @@ Topup your Lebara sim card with credits.
 Install in a virtual environment with pipenv:
 `pipenv install`
 
-Supply required info and run with:
-```
-$ LEBARA_MOBILE=06.. LEBARA_EMAIL=.. LEBARA_BANK=.. ./topup.py
-```
-
 Use your own choice of browser:
 ```
-$ LEBARA_MOBILE=06.. LEBARA_EMAIL=.. LEBARA_BANK=.. BROWSER=chromium ./topup.py
+$ BROWSER=chromium ./topup.py
 ```
 
 Banks to choose from:
