@@ -1,25 +1,23 @@
-Topup your Lebara sim card with credits.
-------------------
-* Only iDeal is supported (for now) as a paypent method.
-* LebaraOne is only supported(for now).
-* Opens the default browser just before signing in bank's website, to let user finish up the payment.
-------------------
+# Topup your Lebara sim card with credits
+
+Prompts user for email, mobile number and bank selection and then opens up the browser in the selected banks website and lets user finish up the payment.
+
+### Install
 Install in a virtual environment with pipenv:
 `pipenv install`
 
-Use your own choice of browser:
+### Run
+```
+$ ./topup.py
+```
+
+or supply the `BROWSER` env variable to use a different browser other than the default:
 ```
 $ BROWSER=chromium ./topup.py
 ```
 
-Banks to choose from:
-- ABN Amro
-- ASN Bank
-- bunq
-- ING
-- Knab
-- ~~Rabobank~~
-- RegioBank
-- SNS Bank
-- Triodos Bank
-- ~~Van Lanschot Bankiers~~
+### Problems
+* Only _iDeal_ is supported (for now) as a paypent method
+* _LebaraOne_ is only supported(for now)
+* Selecting _Rabobank_ or _Van Lanschot Bankiers_ do not seem to work
+
