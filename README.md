@@ -18,6 +18,5 @@ $ BROWSER=chromium ./topup.py
 
 ### Problems
 * Only _iDeal_ is supported (for now) as a paypent method
-* _LebaraOne_ is only supported(for now)
 * Selecting _Rabobank_ or _Van Lanschot Bankiers_ do not seem to work
 

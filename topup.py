@@ -4,34 +4,29 @@ from urllib.parse import urljoin
 import webbrowser
 
 import requests
-from bs4 import BeautifulSoup
+
+from product import get_products, Form
 
 
 URL = 'https://mobile.lebara.com'
-LEBARA_ONE_FORM_ID = 'buyNowFormLebaraOne'
 PAY_FORM_ID = 'localPaymentForm'
 
 
-def get_form_by_id(response, id):
-    html = response.content.decode('utf-8')
-    soup = BeautifulSoup(html, 'html.parser')
-    return soup.find(id=id)
+def select_product(products):
+    # FIXME tabularize
+    print('# - Product - Price')
+    for i, p in enumerate(products, start=1):
+        print(i, p.name, p.data, p.price)
+
+    while True:
+        answer = int(input('Select package: '))
+        if answer > 0 and answer <= len(products):
+            break
+
+    return products[answer - 1]
 
 
-def get_user_details():
-    answer = ''
-    while answer != 'Y':
-        email = input('Email: ')
-        number = input('Mobile number: ')
-        answer = input(
-            'Phone: {} Email: {}\nAre the details correct? [Y/n] '
-            .format(number, email)
-        )
-        print('\n')
-    return email, number
-
-
-def get_user_bank(options):
+def select_bank(options):
     banks = [f'{idx}: {o.text}' for idx, o in enumerate(options, start=1)]
     answer = 0
     while 1:
@@ -51,50 +46,42 @@ def get_user_bank(options):
 
 def main():
     with requests.Session() as s:
-        # get lebara packages
+        # get products
         response = s.get(urljoin(URL, '/nl/en/prepaid-beltegoed-opwaarderen'))
-        lebara_one_form = get_form_by_id(response, LEBARA_ONE_FORM_ID)
-        payload = {element['name']: element['value']
-                   for element in lebara_one_form.find_all('input')}
+        products = get_products(response.content)
 
-        # select lebara one
-        buynow = s.post(urljoin(URL, lebara_one_form['action']), data=payload)
-        returned_form = get_form_by_id(buynow, 'buyNowAutoSubmit')
-        payload = {element['name']: element['value']
-                   for element in returned_form.find_all('input')}
-        topup_login = s.post(urljoin(URL, returned_form['action']), data=payload,
+        # select product
+        product = select_product(products)
+        buynow = s.post(urljoin(URL, product.form.action), data=product.form.data)
+        form = Form.from_id(buynow.content, 'buyNowAutoSubmit')
+        topup_login = s.post(urljoin(URL, form.action), data=form.data,
                              allow_redirects=True)
-        # Guest login
-        email, number = get_user_details()
-        guest_form = get_form_by_id(topup_login, 'lebara-form')
-        csrf_token = guest_form.find('input', dict(name='CSRFToken'))['value']
-        payload = dict(email=email, msisdn=number, msisdnCheck=number,
-                       CSRFToken=csrf_token)
-        login_response = s.post(urljoin(URL, guest_form['action']), data=payload)
-        if 'Please enter valid number' in login_response.text:
-            print('Invalid mobile number.')
+
+        # Authorize
+        email = input('Email: ')
+        number = input('Mobile number: ')
+        guest_form = Form.from_id(topup_login.content, 'lebara-form')
+        guest_form.data.update(email=email, msisdn=number, msisdnCheck=number)
+        auth_response = s.post(urljoin(URL, guest_form.action), data=guest_form.data)
+        auth_form = Form.from_id(auth_response.content, 'lebara-form')
+        if auth_form and auth_form.errors:
+            print('\n'.join(auth_form.errors))
             return
 
         # select payment method
         response = s.get(urljoin(URL, '/nl/en/cart/checkout'), allow_redirects=True)
-        form = get_form_by_id(response, PAY_FORM_ID)
-        select_field = form.find('select', id='payment.choose.bank.label')
-        options = select_field.find_all('option')[1:]
-        bank = get_user_bank(options)
-        bank_code = select_field.find('option', text=bank)['value']
-        payload = dict(
-            issuerId=bank_code,
-            brandCode='ideal',
-            recurringContract='ONECLICK',
-            CSRFToken=csrf_token
-        )
+        form = Form.from_id(response.content, PAY_FORM_ID)
+        for field in form.fields:
+            if field.name == 'select':
+                selection = select_bank(field.find_all('option')[1:])
+                value = field.find('option', text=selection)['value']
+                form.data[field['name']] = value
+
         # checkout to get the form to pay
-        process_response = s.post(urljoin(URL, form['action']), data=payload)
-        form = get_form_by_id(process_response, PAY_FORM_ID)
-        payload = {element['name']: element['value']
-                   for element in form.find_all('input')
-                   if element['name'] != 'CSRFToken'}
-        response = s.post(form['action'], data=payload, allow_redirects=True)
+        process_response = s.post(urljoin(URL, form.action), data=form.data)
+        form = Form.from_id(process_response.content, PAY_FORM_ID)
+        del form.data['CSRFToken']
+        response = s.post(form.action, data=form.data, allow_redirects=True)
 
         webbrowser.open_new_tab(response.url)
 
