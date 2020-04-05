@@ -14,9 +14,11 @@ PAY_FORM_ID = 'localPaymentForm'
 
 def select_product(products):
     # FIXME tabularize
-    print('# - Product - Price')
+    print("================( Select product )================")
+    print('# - Product - Price\n')
     for i, p in enumerate(products, start=1):
         print(i, p.name, p.data, p.price)
+    print()
 
     while True:
         answer = int(input('Select package: '))
@@ -27,10 +29,12 @@ def select_product(products):
 
 
 def select_bank(options):
+    print("\n================( Select bank )================\n")
     banks = [f'{idx}: {o.text}' for idx, o in enumerate(options, start=1)]
     answer = 0
+    print('\n'.join(banks) + '\n')
     while 1:
-        answer = input('\n'.join(banks) + '\nChoose your bank: ')
+        answer = input('Select bank: ')
         try:
             answer = int(answer)
         except ValueError:
@@ -58,6 +62,7 @@ def main():
                              allow_redirects=True)
 
         # Authorize
+        print("\n================( Credentials )================\n")
         email = input('Email: ')
         number = input('Mobile number: ')
         guest_form = Form.from_id(topup_login.content, 'lebara-form')
