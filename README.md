@@ -4,7 +4,9 @@ Prompts user for email, mobile number and bank selection and then opens up the b
 
 ### Install
 Install in a virtual environment with pipenv:
-`pipenv install`
+```sh
+pipenv install
+```
 
 ### Run
 ```
@@ -18,5 +20,5 @@ $ BROWSER=chromium ./topup.py
 
 ### Problems
 * Only _iDeal_ is supported (for now) as a paypent method
-* Selecting _Rabobank_ or _Van Lanschot Bankiers_ do not seem to work
+* Selecting _Van Lanschot Bankiers_ do not seem to work
 
