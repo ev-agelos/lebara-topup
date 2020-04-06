@@ -7,6 +7,7 @@ name = "pypi"
 "beautifulsoup4" = "*"
 requests = "*"
 html5lib = "*"
+tabulate = "*"
 
 [dev-packages]
 

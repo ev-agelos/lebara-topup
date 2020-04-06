@@ -4,6 +4,7 @@ from urllib.parse import urljoin
 import webbrowser
 import argparse
 
+from tabulate import tabulate
 import requests
 
 from product import get_products, Form
@@ -14,11 +15,9 @@ PAY_FORM_ID = 'localPaymentForm'
 
 
 def select_product(products):
-    # FIXME tabularize
-    print("================( Select product )================")
-    print('# - Product - Price\n')
-    for i, p in enumerate(products, start=1):
-        print(i, p.name, p.data, p.price)
+    product_list = [(i, p.name, p.data, p.price)
+                    for i, p in enumerate(products, start=1)]
+    print(tabulate(product_list, headers=['#', 'Product', 'Data', 'Price']))
     print()
 
     while True:
@@ -30,10 +29,9 @@ def select_product(products):
 
 
 def select_bank(options):
-    print("\n================( Select bank )================\n")
-    banks = [f'{idx}: {o.text}' for idx, o in enumerate(options, start=1)]
+    banks = [(idx, o.text) for idx, o in enumerate(options, start=1)]
+    print(tabulate(banks))
     answer = 0
-    print('\n'.join(banks) + '\n')
     while 1:
         answer = input('Select bank: ')
         try:
