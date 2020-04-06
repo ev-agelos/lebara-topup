@@ -2,6 +2,7 @@
 
 from urllib.parse import urljoin
 import webbrowser
+import argparse
 
 import requests
 
@@ -48,7 +49,7 @@ def select_bank(options):
     return options[answer - 1].text
 
 
-def main():
+def main(email, number):
     with requests.Session() as s:
         # get products
         response = s.get(urljoin(URL, '/nl/en/prepaid-beltegoed-opwaarderen'))
@@ -62,9 +63,6 @@ def main():
                              allow_redirects=True)
 
         # Authorize
-        print("\n================( Credentials )================\n")
-        email = input('Email: ')
-        number = input('Mobile number: ')
         guest_form = Form.from_id(topup_login.content, 'lebara-form')
         guest_form.data.update(email=email, msisdn=number, msisdnCheck=number)
         auth_response = s.post(urljoin(URL, guest_form.action), data=guest_form.data)
@@ -92,4 +90,8 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description='Top up your Lebara sim card with credits.')
+    parser.add_argument('email', help='The email address of the owner of the number.')
+    parser.add_argument('number', help='The mobile number that is associated with the sim card.')
+    arguments = parser.parse_args()
+    main(arguments.email, arguments.number)
